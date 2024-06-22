@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Cliente </title>
+
+</head>
+<body>
+     <div>
+    <h2 style="color: antiquewhite;">Irmãos Soares</h2>
+    
+            <form>
+        
+        <select id="item">
+            <optgroup label="Cobre">
+            <option>Cobre 1</option>
+            <option>Cobre 2</option>
+            <option>Cobre 3</option>
+            <option>Cobre Tubo</option>
+            </optgroup>
+            <option>Metal</option>
+            <option>Bronze</option>
+            <option>LATA -4%</option>
+            <option>Lata</option>
+            <option>Perfil</option>
+            <option>Perfil Pintado</option>
+            <option>Estamparia</option>
+            <option>Bloco</option>
+            <option>Bloco c/f</option>
+            
+
+            <optgroup label="Chumbo">
+            <option>Chumbo</option>
+            <option>Chumbo Duro</option>   
+            </optgroup>
+            
+            <option>Bateria</option>
+            <option>Antimonio</option>
+
+            <optgroup label="Aço">
+            <option>Aço</option>   
+            <option>Aço Panela</option>
+            </optgroup>
+            
+            <optgroup label="Motor">
+            <option>Motor G</option>
+            <option>Motor P</option>
+            <option>motor Al</option>
+            </optgroup>
+            
+            <option>Roda</option>
+            
+            <optgroup label="Radiador">
+            <option>RCA S/F</option>
+            <option>RCA C/F</option>
+            <option>RAD. Metal</option>   
+            <option>RDA</option>
+            </optgroup>
+            
+            <option>Persiana</option>
+            <optgroup label="Panela">
+            <option>Panela</option>
+            <option>Panela C/F</option>
+            </optgroup>
+            <optgroup label="Placa">
+            <option>Placa Mãe</option>
+            <option>Placa Intermediaria</option>
+            <option>Placa Pesada</option>
+            <option>H.D</option>
+            </optgroup>
+            
+            
+            <optgroup label="Limalha">
+            <option>Limalha AL</option>
+            <option>Limalha Cobre</option>
+            <option >Limalha Metal</option>
+            <option>Palha</option>    
+            </optgroup>
+            
+            <option>lino Tipo</option>
+            <option>Chumbo de Roda</option>
+            <option>Aerosol C/F</option>
+            <option>Aerosol S/F</option>
+            <option>Cabo</option>
+            <option>Cabo de aluminio</option>
+            <option>Fio</option>
+            <option>Lino Type</option>
+            <option>Zinco</option>
+            <option>Estrutural</option>
+            <option>OffSet</option>
+            <optgroup label="Borra">
+            <option>Borra Aluminio</option>
+            <option>Borra Cobre</option>
+            <option>Borra Metal</option>   
+            </optgroup>
+            <option>Obs 1</option>
+            <option>Obs 2</option>
+
+
+        </select>
+    </form>
+
+    </select>
+
+   <input type="number" id="pesoBruto" placeholder="Peso Bruto (Kg)" required >
+    <input type="number" id="tara" placeholder="Tara (Kg)" required >
+    <button id="add" onclick="adicionarProduto()">Adicionar</button>
+</div>
+    <p><table id="tabela">
+        <thead>
+            <td colspan="5">Irmãos Soares</td>
+            <tr>
+                <th>Item</th>
+                <th>Peso Bruto (Kg)</th>
+                <th>Tara (Kg)</th>
+                <th>Peso Líquido (Kg)</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"><strong>Total</strong></td>
+                <td id="totalPeso">0.00</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button id="btn" onclick="imprimirTabela()">Imprimir Tabela</button>
+    <button id="btn2" onclick="resetTabela()">Reset</button>
+    
+</body>
+</html>
