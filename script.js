@@ -137,5 +137,5 @@ function salvarTabela() {
     });
 
     // Salvar o PDF com um nome padrão
-    doc.save(`tabela_pesagem_${nomeCliente.replace(/ /g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
+    doc.save(`_${nomeCliente.replace(/ /g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
 }
