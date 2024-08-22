@@ -1,97 +1,136 @@
-
-body{
-    
-    background-color: rgb(73, 141, 230);
-    
-}
-table, th, td{
-    border: 1px solid black;
-    border-collapse: collapse;
+body {
     text-align: center;
+    background-color: rgb(65, 115, 189);
+    font-family: Montserrat, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+table, th, td {
+    border: 1.5px solid black;
+    text-align: center;
+    background: #fbfbfb;
+    margin: 0 auto;
+    border-collapse: collapse;
     padding: 4px 15px;
 }
-table tr:nth-child(odd){
-background-color: rgb(238, 238, 238);
+
+table tr:nth-child(odd) {
+    background-color: rgb(238, 238, 238);
 }
 
-table tr:nth-child(even){
-background-color: rgb(255, 255, 255);
+table tr:nth-child(even) {
+    background-color: rgb(104, 98, 98);
 }
-th{
+
+th {
     background-color: rgb(161, 162, 165);
-    
-}
-form{
-    
-    margin-left: 235px;
-}
-input {
-    padding: 5px 2%;
-    margin-left: 200px;
-    display: block;
 }
 
-@media only screen and (max-width: 1280px) {
-select{
-    padding: 5px 4%;
-    border-radius:8px ;
-    margin-bottom: -20px;
-    position:absolute; 
-    top:5%;
-    left:50%;
+button {
+    margin-top: 10px;
+    border-radius: 1dvh;
+    padding: 9px;
 }
-    form{
-        
-        border-radius: 8px;
-        margin-left: 80px;
+
+/* Estilo do modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #636568;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Estilo para impressão */
+@media print {
+    button, .acoes {
+        display: none;
     }
-    input {
-        padding: 6px ;
-        margin-left: 80px;
-        margin-top: 5px;
+}
+
+/* Melhorias de responsividade */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    table, th, td {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .modal-content {
+        width: 90%;
+        padding: 15px;
+    }
+
+    th, td {
         display: block;
-        border-radius: 8px;
-        position:relative;
-        top:10%;
-        left:28%;
-    } 
-    button{
-        color: rgb(2, 2, 2);
-        padding: 13px 10px;
-        border: none;
-        cursor: pointer;
-        box-shadow: 3px 6px 5px rgba(0, 0, 0, 0.3);
-        border-radius: 5px;}
-    #add {
-    position:absolute; 
-    top:15%;
-    left:78%;
-
-}
-#tara{
-    width: 90px;
-}
-#btn{
-    position :absolute; 
-    top:21%;
-    left:3%;
-    width: 102px;
-    height: 8%;
-    
-}
-#btn2{
-    position :absolute; 
-    top:21%;
-    left:30%;
-    width: 75px;
-    height: 8%;
-}
-        table, th, td{
-            margin-top: 20%;
-            border: 1px solid black;
-            border-collapse: collapse;
-            text-align: center;
-            padding: 8px 5px;
-        } 
+        width: 100%;
+        box-sizing: border-box;
     }
 
+    table thead {
+        display: none;
+    }
+
+    table tbody tr {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    table tbody tr td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+
+    table tbody tr td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-left: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    button {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    #btn, #btn2 {
+        margin-top: 10px;
+    }
+}
