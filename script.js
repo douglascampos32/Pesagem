@@ -19,6 +19,7 @@ window.onclick = function(event) {
     }
 }
 
+
 function adicionarProduto() {
     const item = document.getElementById("item").value;
     const pesoBruto = parseFloat(document.getElementById("pesoBruto").value);
@@ -40,7 +41,7 @@ function adicionarProduto() {
     renderizarTabela();
     limparCampos();
     salvarLocalStorage();
-    modal.style.display = "none"; // Fechar o modal após adicionar o produto
+    //modal.style.display = "none"; Fechar o modal após adicionar o produto
 }
 
 function renderizarTabela() {
@@ -96,8 +97,7 @@ function resetTabela() {
 function salvarLocalStorage() {
     localStorage.setItem('produtos', JSON.stringify(produtos));
 }
-// Variável global para armazenar o nome do cliente
-// Variável global para armazenar o nome do cliente
+
 let nomeCliente;
 
 window.onload = function() {
@@ -127,15 +127,26 @@ function salvarTabela() {
     // Obter a data atual
     const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-  
+    // Obter a tabela HTML
+    const tabela = document.getElementById("tabela").cloneNode(true);
+
+    // Remover a coluna "Ações" da tabela
+    const acoesHeader = tabela.querySelectorAll('th.acoes');
+    acoesHeader.forEach(header => header.remove());
+
+    const acoesCells = tabela.querySelectorAll('td.acoes');
+    acoesCells.forEach(cell => cell.remove());
+
+
+
     // Adicionar a tabela ao PDF
-    const tabela = document.getElementById("tabela");
     doc.autoTable({
         html: tabela,
         startY: 40,
         styles: { cellPadding: 3, fontSize: 10, halign: 'center' },
     });
-
     // Salvar o PDF com um nome padrão
-    doc.save(`_${nomeCliente.replace(/ /g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
+    doc.save(`${nomeCliente.replace(/ /g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
 }
+
+
