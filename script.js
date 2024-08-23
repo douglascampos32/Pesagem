@@ -41,7 +41,7 @@ function adicionarProduto() {
     renderizarTabela();
     limparCampos();
     salvarLocalStorage();
-    //modal.style.display = "none"; Fechar o modal após adicionar o produto
+    modal.style.display = "none"; //Fechar o modal após adicionar o produto
 }
 
 function renderizarTabela() {
