@@ -79,7 +79,22 @@ button {
     text-decoration: none;
     cursor: pointer;
 }
+#modalBtn {
+    position: fixed;   /* Fixa o botão na tela */
+    bottom: 20px;      /* Distância do fundo da tela */
+    right: 20px;       /* Distância da direita da tela */
+    padding: 10px 20px; /* Tamanho do botão */
+    background-color: #121213; /* Cor de fundo */
+    color: white;      /* Cor do texto */
+    border: none;      /* Sem borda */
+    border-radius: 5px; /* Bordas arredondadas */
+    cursor: pointer;   /* Cursor de mão ao passar o mouse */
+    z-index: 1000;     /* Garante que o botão fique acima de outros elementos */
+}
 
+#modalBtn:hover {
+    background-color: #0056b3; /* Cor ao passar o mouse */
+}
 /* Estilo para impressão */
 @media print {
     button, .acoes {
