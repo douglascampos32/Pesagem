@@ -1,6 +1,6 @@
-let produtos = localStorage.getItem('produtos') ? JSON.parse(localStorage.getItem('produtos')) : {};
+let produtos = localStorage.getItem('produtos') ? JSON.parse(localStorage.getItem('produtos')) : [];
+let nomeCliente;
 
-// Função para abrir o modal
 const modal = document.getElementById("itemModal");
 const btn = document.getElementById("modalBtn");
 const span = document.getElementsByClassName("close")[0];
@@ -19,59 +19,60 @@ window.onclick = function(event) {
     }
 }
 
+window.onload = function() {
+    nomeCliente = window.prompt("Por favor, insira o nome do cliente:");
+    if (!nomeCliente) {
+        nomeCliente = "Cliente Desconhecido";
+    }
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    document.getElementById("headerInfo").textContent = `Irmãos Soares  -   Cliente: ${nomeCliente}    -   Data: ${dataAtual}`;
+    renderizarTabela();
+};
 
 function adicionarProduto() {
     const item = document.getElementById("item").value;
     const pesoBruto = parseFloat(document.getElementById("pesoBruto").value);
     const tara = parseFloat(document.getElementById("tara").value);
-
+    
     let pesoLiquido = pesoBruto - tara;
     if (item.toLowerCase() === 'lata -4%') {
-        pesoLiquido *= 0.96; // Desconto de 4% para latas
+        pesoLiquido *= 0.96;
     }
-
-    if (!produtos[item]) {
-        produtos[item] = { pesoBruto: pesoBruto, tara: tara, pesoLiquido: pesoLiquido };
-    } else {
-        produtos[item].pesoBruto += pesoBruto;
-        produtos[item].tara += tara;
-        produtos[item].pesoLiquido += pesoLiquido;
-    }
-
+    
+    produtos.push({ item, pesoBruto, tara, pesoLiquido });
+    
     renderizarTabela();
     limparCampos();
     salvarLocalStorage();
-    modal.style.display = "none"; //Fechar o modal após adicionar o produto
+    modal.style.display = "none";
 }
 
 function renderizarTabela() {
     const tbody = document.getElementById("tbody");
     tbody.innerHTML = "";
-
+    
     let totalPeso = 0;
-
-    for (let item in produtos) {
-        const produto = produtos[item];
+    
+    produtos.forEach((produto, index) => {
         totalPeso += produto.pesoLiquido;
-
+        
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${item}</td>
+            <td>${produto.item}</td>
             <td>${produto.pesoBruto.toFixed(2)}</td>
             <td>${produto.tara.toFixed(2)}</td>
             <td>${produto.pesoLiquido.toFixed(2)}</td>
-            <td class="acoes"><button onclick="excluirProduto('${item}')">Excluir</button></td>
+            <td class="acoes"><button onclick="excluirProduto(${index})">Excluir</button></td>
         `;
         tbody.appendChild(tr);
-    }
-
+    });
+    
     document.getElementById("totalPeso").textContent = totalPeso.toFixed(2);
 }
 
-function excluirProduto(item) {
-    const confirmarExclusao = confirm(`Tem certeza que deseja excluir o produto '${item}'?`);
-    if (confirmarExclusao) {
-        delete produtos[item];
+function excluirProduto(index) {
+    if (confirm("Tem certeza que deseja excluir este produto?")) {
+        produtos.splice(index, 1);
         renderizarTabela();
         salvarLocalStorage();
     }
@@ -81,14 +82,9 @@ function limparCampos() {
     document.getElementById("form").reset();
 }
 
-function imprimirTabela() {
-    window.print();
-}
-
 function resetTabela() {
-    const confirmarReset = confirm("Tem certeza que deseja resetar a tabela?");
-    if (confirmarReset) {
-        produtos = {};
+    if (confirm("Tem certeza que deseja resetar a tabela?")) {
+        produtos = [];
         renderizarTabela();
         localStorage.removeItem('produtos');
     }
@@ -98,55 +94,41 @@ function salvarLocalStorage() {
     localStorage.setItem('produtos', JSON.stringify(produtos));
 }
 
-let nomeCliente;
-
-window.onload = function() {
-    // Solicita o nome do cliente ao carregar a página
-    nomeCliente = window.prompt("Por favor, insira o nome do cliente:");
-
-    // Caso o usuário não insira um nome, define um valor padrão
-    if (!nomeCliente) {
-        nomeCliente = "Cliente Desconhecido";
-    }
-
-    // Obter a data atual
-    const dataAtual = new Date().toLocaleDateString('pt-BR');
-
-    // Inserir o nome do cliente e a data no cabeçalho da tabela
-    const headerInfo = document.getElementById("headerInfo");
-    headerInfo.textContent = `Irmãos Soares  -   Cliente: ${nomeCliente}    -   Data: ${dataAtual}`;
-
-    // Renderiza a tabela ao carregar a página
-    renderizarTabela();
-};
+function agruparProdutos() {
+    const produtosAgrupados = {};
+    
+    produtos.forEach(({ item, pesoBruto, tara, pesoLiquido }) => {
+        if (!produtosAgrupados[item]) {
+            produtosAgrupados[item] = { pesoBruto: 0, tara: 0, pesoLiquido: 0 };
+        }
+        produtosAgrupados[item].pesoBruto += pesoBruto;
+        produtosAgrupados[item].tara += tara;
+        produtosAgrupados[item].pesoLiquido += pesoLiquido;
+    });
+    
+    return produtosAgrupados;
+}
 
 function salvarTabela() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
-    // Obter a data atual
     const dataAtual = new Date().toLocaleDateString('pt-BR');
-
-    // Obter a tabela HTML
-    const tabela = document.getElementById("tabela").cloneNode(true);
-
-    // Remover a coluna "Ações" da tabela
-    const acoesHeader = tabela.querySelectorAll('th.acoes');
-    acoesHeader.forEach(header => header.remove());
-
-    const acoesCells = tabela.querySelectorAll('td.acoes');
-    acoesCells.forEach(cell => cell.remove());
-
-
-
-    // Adicionar a tabela ao PDF
+    
+    doc.text(`Irmãos Soares  -   Cliente: ${nomeCliente}    -   Data: ${dataAtual}`, 10, 10);
+    
+    const produtosAgrupados = agruparProdutos();
+    
+    const tabela = [];
+    for (let item in produtosAgrupados) {
+        const p = produtosAgrupados[item];
+        tabela.push([item, p.pesoBruto.toFixed(2), p.tara.toFixed(2), p.pesoLiquido.toFixed(2)]);
+    }
+    
     doc.autoTable({
-        html: tabela,
-        startY: 40,
-        styles: { cellPadding: 3, fontSize: 10, halign: 'center' },
+        head: [['Item', 'Peso Bruto', 'Tara', 'Peso Líquido']],
+        body: tabela,
+        startY: 20
     });
-    // Salvar o PDF com um nome padrão
+    
     doc.save(`${nomeCliente.replace(/ /g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
 }
-
-
