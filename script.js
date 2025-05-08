@@ -128,7 +128,7 @@ function agruparProdutos() {
         startY: 20
     });
 
-    const nomeRascunho = `rascunho_${clienteNome}_${dataFormatada}.pdf`;
+    const nomeRascunho = `${clienteNome}_rascunho_${dataFormatada}.pdf`;
     docRascunho.save(nomeRascunho);
 
     // ===== PDF 2: Resumo agrupado com desconto aplicado =====
@@ -156,7 +156,7 @@ function agruparProdutos() {
     ]);
 
     docResumo.autoTable({
-        head: [['Item', 'Peso Líquido Total']],
+        head: [['Item', 'Peso Líquido']],
         body: tabelaResumo,
         startY: 30
     });
