@@ -34,18 +34,16 @@ function adicionarProduto() {
     const pesoBruto = parseFloat(document.getElementById("pesoBruto").value);
     const tara = parseFloat(document.getElementById("tara").value);
     
-    let pesoLiquido = pesoBruto - tara;
-    if (item.toLowerCase() === 'lata -4%') {
-        pesoLiquido *= 0.96;
-    }
-    
+    const pesoLiquido = pesoBruto - tara; // Sem desconto aqui
+
     produtos.push({ item, pesoBruto, tara, pesoLiquido });
-    
+
     renderizarTabela();
     limparCampos();
     salvarLocalStorage();
     modal.style.display = "none";
 }
+
 
 function renderizarTabela() {
     const tbody = document.getElementById("tbody");
@@ -107,28 +105,62 @@ function agruparProdutos() {
     });
     
     return produtosAgrupados;
-}
-
-function salvarTabela() {
+}function salvarTabela() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
     const dataAtual = new Date().toLocaleDateString('pt-BR');
-    
-    doc.text(`Irmãos Soares  -   Cliente: ${nomeCliente}    -   Data: ${dataAtual}`, 10, 10);
-    
-    const produtosAgrupados = agruparProdutos();
-    
-    const tabela = [];
-    for (let item in produtosAgrupados) {
-        const p = produtosAgrupados[item];
-        tabela.push([item, p.pesoBruto.toFixed(2), p.tara.toFixed(2), p.pesoLiquido.toFixed(2)]);
-    }
-    
-    doc.autoTable({
+    const dataFormatada = dataAtual.replace(/\//g, "-");
+    const clienteNome = nomeCliente.replace(/ /g, "_");
+
+    // ===== PDF 1: Rascunho completo =====
+    const docRascunho = new jsPDF();
+    docRascunho.text(`Cliente: ${nomeCliente} - Data: ${dataAtual}`, 10, 10);
+
+    const tabelaRascunho = produtos.map(p => [
+        p.item,
+        p.pesoBruto.toFixed(2),
+        p.tara.toFixed(2),
+        p.pesoLiquido.toFixed(2)
+    ]);
+
+    docRascunho.autoTable({
         head: [['Item', 'Peso Bruto', 'Tara', 'Peso Líquido']],
-        body: tabela,
+        body: tabelaRascunho,
         startY: 20
     });
-    
-    doc.save(`${nomeCliente.replace(/ /g, "_")}_${dataAtual.replace(/\//g, "-")}.pdf`);
+
+    const nomeRascunho = `rascunho_${clienteNome}_${dataFormatada}.pdf`;
+    docRascunho.save(nomeRascunho);
+
+    // ===== PDF 2: Resumo agrupado com desconto aplicado =====
+    const docResumo = new jsPDF();
+    docResumo.text(`Cliente: ${nomeCliente} - Data: ${dataAtual}`, 10, 10);
+    //docResumo.text('Resumo Agrupado (com desconto em "lata -4%"):', 10, 20);
+
+    const agrupado = {};
+    produtos.forEach(({ item, pesoLiquido }) => {
+        if (!agrupado[item]) {
+            agrupado[item] = 0;
+        }
+
+        let liquido = pesoLiquido;
+        if (item.toLowerCase() === 'lata -4%') {
+            liquido *= 0.96; // Aplica desconto só no PDF
+        }
+
+        agrupado[item] += liquido;
+    });
+
+    const tabelaResumo = Object.entries(agrupado).map(([item, peso]) => [
+        item,
+        peso.toFixed(2)
+    ]);
+
+    docResumo.autoTable({
+        head: [['Item', 'Peso Líquido Total']],
+        body: tabelaResumo,
+        startY: 30
+    });
+
+    const nomeResumo = `${clienteNome}_${dataFormatada}.pdf`;
+    docResumo.save(nomeResumo);
 }
