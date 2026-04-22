@@ -25,9 +25,11 @@ window.onload = function() {
         nomeCliente = "Cliente Desconhecido";
     }
     const dataAtual = new Date().toLocaleDateString('pt-BR');
-    document.getElementById("headerInfo").textContent = `Irmãos Soares  -   Cliente: ${nomeCliente}    -   Data: ${dataAtual}`;
+    document.getElementById("headerInfo").textContent = `GTA SUCATAS  -   Cliente: ${nomeCliente}    -   Data: ${dataAtual}`;
     renderizarTabela();
 };
+
+
 
 function adicionarProduto() {
     const item = document.getElementById("item").value;
@@ -84,7 +86,18 @@ function resetTabela() {
     if (confirm("Tem certeza que deseja resetar a tabela?")) {
         produtos = [];
         renderizarTabela();
+
         localStorage.removeItem('produtos');
+        localStorage.removeItem('cliente');
+
+        nomeCliente = prompt("Por favor, insira o nome do cliente:");
+        if (!nomeCliente) nomeCliente = "Cliente Desconhecido";
+
+        localStorage.setItem("cliente", nomeCliente);
+
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
+        document.getElementById("headerInfo").textContent =
+            `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
     }
 }
 
@@ -163,4 +176,183 @@ function agruparProdutos() {
 
     const nomeResumo = `${clienteNome}_${dataFormatada}.pdf`;
     docResumo.save(nomeResumo);
+}
+window.onload = function() {
+    nomeCliente = localStorage.getItem("cliente");
+
+    if (!nomeCliente) {
+        nomeCliente = prompt("Por favor, insira o nome do cliente:");
+        if (!nomeCliente) nomeCliente = "Cliente Desconhecido";
+        localStorage.setItem("cliente", nomeCliente);
+    }
+
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    document.getElementById("headerInfo").textContent =
+        `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
+
+    renderizarTabela();
+};
+function trocarCliente() {
+    let novoCliente = prompt("Digite o nome do novo cliente:");
+
+    if (!novoCliente) {
+        alert("Nome inválido!");
+        return;
+    }
+
+    nomeCliente = novoCliente;
+
+    // salva no localStorage
+    localStorage.setItem("cliente", nomeCliente);
+
+    // atualiza o cabeçalho
+    const dataAtual = new Date().toLocaleDateString('pt-BR');
+    document.getElementById("headerInfo").textContent =
+        `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
+}
+
+function imprimirCupom() {
+    const dataAtual = new Date().toLocaleString('pt-BR');
+
+    // Nome do arquivo (para impressão/PDF)
+    const nomeArquivo = nomeCliente.replace(/[^a-zA-Z0-9]/g, "_");
+
+    let total = 0;
+
+    // 🔥 AGRUPAR PRODUTOS
+    const agrupado = {};
+
+    produtos.forEach(p => {
+        if (!agrupado[p.item]) {
+            agrupado[p.item] = 0;
+        }
+        agrupado[p.item] += p.pesoLiquido;
+        total += p.pesoLiquido;
+    });
+
+    // 🔥 MONTAR ITENS
+    let itens = "";
+
+    Object.entries(agrupado).forEach(([item, peso]) => {
+        itens += `
+            <div class="item">
+                <div>${item}</div>
+                <div>${peso.toFixed(2)} Kg</div>
+            </div>
+        `;
+    });
+
+    const numeroWhatsApp = "5521995691457";
+    const mensagem = encodeURIComponent(`Olá`);
+    const linkWhats = `https://wa.me/${numeroWhatsApp}?text=${mensagem}`;
+    const qrCodeURL = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(linkWhats)}`;
+
+    let win = window.open("", "", "width=300,height=600");
+
+    win.document.write(`
+        <html>
+        <head>
+            <title>Cupom - ${nomeArquivo}</title>
+            <style>
+                body {
+                    font-family: 'Courier New', monospace;
+                    width: 48mm;
+                    text-align: center;
+                    margin: 0 auto;
+                    padding: 10px;
+                    font-size: 13px; /* 🔥 FONTE GERAL MAIOR */
+                }
+
+                .logo {
+    width: 115%; /* 🔥 maior sem quebrar layout */
+    max-width: 48mm; /* garante que não ultrapasse o papel */
+    margin-bottom: 8px;
+}
+
+                .item {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 13px; /* 🔥 ITENS MAIORES */
+                    margin-bottom: 3px;
+                }
+
+                .item div:first-child {
+                    max-width: 65%;
+                    text-align: left;
+                }
+
+                .item div:last-child {
+                    text-align: right;
+                }
+
+                hr {
+                    border: none;
+                    border-top: 1px dashed black;
+                    margin: 8px 0;
+                }
+
+                .zap {
+                    font-size: 11px;
+                    margin-top: 5px;
+                    font-weight: bold;
+                }
+
+                .total {
+                    font-size: 16px; /* 🔥 DESTAQUE TOTAL */
+                    display: flex;
+                    justify-content: space-between;
+                    font-weight: bold;
+                }
+
+                @media print {
+                    @page { margin: 0; }
+                    body { margin: 0.5cm; }
+                }
+            </style>
+        </head>
+
+        <body>
+            <img src="logo.png" class="logo">
+
+     
+            
+
+            <div style="text-align: left;">
+                <div><strong>Cliente:</strong> ${nomeCliente}</div>
+                <div><strong>Data:</strong> ${dataAtual}</div>
+            </div>
+
+            <hr>
+
+            ${itens}
+
+            <hr>
+
+            <div class="total">
+                <span>TOTAL:</span>
+                <span>${total.toFixed(2)} Kg</span>
+            </div>
+
+            <hr>
+
+            <br><br>
+            <div style="border-top: 1px solid black; margin-top: 10px;">
+                Assinatura
+            </div>
+ <br><br><br>
+
+               <img src="${qrCodeURL}" style="margin: 10px 0;">
+            <div class="zap">Fale conosco no WhatsApp</div>
+
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            </script>
+        </body>
+        </html>
+    `);
+
+    win.document.close();
 }
