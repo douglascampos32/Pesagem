@@ -1,4 +1,14 @@
-let produtos = localStorage.getItem('produtos') ? JSON.parse(localStorage.getItem('produtos')) : [];
+let pesagemId = sessionStorage.getItem("pesagemId");
+
+if (!pesagemId) {
+    pesagemId = "pesagem_" + Date.now();
+    sessionStorage.setItem("pesagemId", pesagemId);
+}
+
+
+let produtos = localStorage.getItem(pesagemId) 
+    ? JSON.parse(localStorage.getItem(pesagemId)) 
+    : [];
 let nomeCliente;
 
 const modal = document.getElementById("itemModal");
@@ -14,20 +24,75 @@ span.onclick = function() {
 }
 
 window.onclick = function(event) {
-    if (event.target == modal) {
+    if (event.target === modal) {
         modal.style.display = "none";
     }
 }
 
-window.onload = function() {
-    nomeCliente = window.prompt("Por favor, insira o nome do cliente:");
-    if (!nomeCliente) {
-        nomeCliente = "Cliente Desconhecido";
+
+
+function novaPesagem() {
+    window.open(window.location.href, "_blank");
+}
+
+document.addEventListener("keydown", function(e) {
+
+    const tag = document.activeElement.tagName.toLowerCase();
+
+    // 🔒 evita conflito digitando
+    const digitando = (tag === "input" || tag === "textarea" || tag === "select");
+
+    // ➕ ABRIR MODAL
+    if ((e.key === "+" || (e.key === "=" && e.shiftKey)) && !digitando) {
+        e.preventDefault();
+        modal.style.display = "block";
+        limparCampos(); // 🔥 limpa antes de abrir
+
+   setTimeout(() => {
+    const select = document.getElementById("item");
+    select.focus();
+    select.click(); // 🔥 abre lista automaticamente
+}, 100);
     }
-    const dataAtual = new Date().toLocaleDateString('pt-BR');
-    document.getElementById("headerInfo").textContent = `GTA SUCATAS  -   Cliente: ${nomeCliente}    -   Data: ${dataAtual}`;
-    renderizarTabela();
-};
+
+    // ESC → FECHAR MODAL
+    if (e.key === "Escape") {
+        modal.style.display = "none";
+    }
+
+
+    // F2 → TROCAR CLIENTE
+    if (e.key === "F2") {
+        e.preventDefault();
+        trocarCliente();
+    }
+
+    // F4 → IMPRIMIR CUPOM
+    if (e.key === "F4") {
+        e.preventDefault();
+        imprimirCupom();
+    }
+
+    // F8 → NOVA PESAGEM
+    if (e.key === "F8") {
+        e.preventDefault();
+        novaPesagem();
+    }
+
+    // F9 → RESET
+    if (e.key === "F9") {
+        e.preventDefault();
+        resetTabela();
+    }
+if (e.key === "Delete") {
+    const selecionado = document.querySelector(".selecionado");
+
+    if (selecionado) {
+        const index = selecionado.dataset.index;
+        excluirProduto(parseInt(index));
+    }
+}
+});
 
 
 
@@ -40,10 +105,16 @@ function adicionarProduto() {
 
     produtos.push({ item, pesoBruto, tara, pesoLiquido });
 
+    if (isNaN(pesoBruto) || isNaN(tara)) {
+    alert("Preencha os campos corretamente!");
+    return;
+}
+
     renderizarTabela();
     limparCampos();
     salvarLocalStorage();
     modal.style.display = "none";
+    
 }
 
 
@@ -53,21 +124,31 @@ function renderizarTabela() {
     
     let totalPeso = 0;
     
-    produtos.forEach((produto, index) => {
-        totalPeso += produto.pesoLiquido;
-        
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${produto.item}</td>
-            <td>${produto.pesoBruto.toFixed(2)}</td>
-            <td>${produto.tara.toFixed(2)}</td>
-            <td>${produto.pesoLiquido.toFixed(2)}</td>
-            <td class="acoes"><button onclick="excluirProduto(${index})">Excluir</button></td>
-        `;
-        tbody.appendChild(tr);
-    });
+produtos.forEach((produto, index) => {
+    totalPeso += produto.pesoLiquido;
+    
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+        <td>${produto.item}</td>
+        <td>${produto.pesoBruto.toFixed(2)}</td>
+        <td>${produto.tara.toFixed(2)}</td>
+        <td>${produto.pesoLiquido.toFixed(2)}</td>
+        <td class="acoes"><button onclick="excluirProduto(${index})">Excluir</button></td>
+    `;
+
+    // ✅ AGORA SIM CORRETO
+    tr.onclick = function() {
+        document.querySelectorAll("#tbody tr").forEach(r => r.classList.remove("selecionado"));
+        tr.classList.add("selecionado");
+        tr.dataset.index = index;
+    };
+
+    tbody.appendChild(tr);
+});
     
     document.getElementById("totalPeso").textContent = totalPeso.toFixed(2);
+
 }
 
 function excluirProduto(index) {
@@ -82,27 +163,36 @@ function limparCampos() {
     document.getElementById("form").reset();
 }
 
-function resetTabela() {
-    if (confirm("Tem certeza que deseja resetar a tabela?")) {
-        produtos = [];
-        renderizarTabela();
+function registrarPesagem() {
+    let lista = JSON.parse(localStorage.getItem("listaPesagens")) || [];
 
-        localStorage.removeItem('produtos');
-        localStorage.removeItem('cliente');
+    const existe = lista.find(p => p.id === pesagemId);
 
-        nomeCliente = prompt("Por favor, insira o nome do cliente:");
-        if (!nomeCliente) nomeCliente = "Cliente Desconhecido";
+    if (!existe) {
+        lista.push({
+            id: pesagemId,
+            cliente: nomeCliente,
+            data: new Date().toLocaleString('pt-BR')
+        });
 
-        localStorage.setItem("cliente", nomeCliente);
-
-        const dataAtual = new Date().toLocaleDateString('pt-BR');
-        document.getElementById("headerInfo").textContent =
-            `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
+        localStorage.setItem("listaPesagens", JSON.stringify(lista));
     }
 }
 
+function resetTabela() {
+    if (confirm("Tem certeza que deseja resetar a tabela?")) {
+
+        produtos = [];
+        renderizarTabela();
+
+        localStorage.removeItem(pesagemId);
+        localStorage.removeItem(pesagemId + "_cliente");
+
+        location.reload(); // 🔥 reinicia limpo
+    }
+}
 function salvarLocalStorage() {
-    localStorage.setItem('produtos', JSON.stringify(produtos));
+    localStorage.setItem(pesagemId, JSON.stringify(produtos));
 }
 
 function agruparProdutos() {
@@ -178,19 +268,23 @@ function agruparProdutos() {
     docResumo.save(nomeResumo);
 }
 window.onload = function() {
-    nomeCliente = localStorage.getItem("cliente");
+
+    nomeCliente = localStorage.getItem(pesagemId + "_cliente");
 
     if (!nomeCliente) {
         nomeCliente = prompt("Por favor, insira o nome do cliente:");
         if (!nomeCliente) nomeCliente = "Cliente Desconhecido";
-        localStorage.setItem("cliente", nomeCliente);
+
+        localStorage.setItem(pesagemId + "_cliente", nomeCliente);
     }
 
     const dataAtual = new Date().toLocaleDateString('pt-BR');
+
     document.getElementById("headerInfo").textContent =
         `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
 
     renderizarTabela();
+    registrarPesagem();
 };
 function trocarCliente() {
     let novoCliente = prompt("Digite o nome do novo cliente:");
@@ -202,11 +296,27 @@ function trocarCliente() {
 
     nomeCliente = novoCliente;
 
-    // salva no localStorage
-    localStorage.setItem("cliente", nomeCliente);
+    // salva cliente da pesagem
+    localStorage.setItem(pesagemId + "_cliente", nomeCliente);
 
-    // atualiza o cabeçalho
+    // 🔥 ATUALIZA NO PAINEL
+    let lista = JSON.parse(localStorage.getItem("listaPesagens")) || [];
+
+    lista = lista.map(p => {
+        if (p.id === pesagemId) {
+            return {
+                ...p,
+                cliente: nomeCliente
+            };
+        }
+        return p;
+    });
+
+    localStorage.setItem("listaPesagens", JSON.stringify(lista));
+
+    // atualiza tela
     const dataAtual = new Date().toLocaleDateString('pt-BR');
+
     document.getElementById("headerInfo").textContent =
         `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
 }
@@ -233,7 +343,9 @@ function imprimirCupom() {
     // 🔥 MONTAR ITENS
     let itens = "";
 
-    Object.entries(agrupado).forEach(([item, peso]) => {
+    Object.entries(agrupado)
+    .sort((a, b) => a[0].toLowerCase().localeCompare(b[0].toLowerCase()))
+    .forEach(([item, peso]) => {
         itens += `
             <div class="item">
                 <div>${item}</div>
