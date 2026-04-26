@@ -229,7 +229,7 @@ function agruparProdutos() {
     // ===== PDF 1: Rascunho completo =====
     
     const docRascunho = new jsPDF();docRascunho.setFontSize(15); // 👈 aumenta aqui
-    docRascunho.text(`Cliente: ${nomeCliente} - Data: ${dataAtual}`, 10, 10);
+    docRascunho.text(`Cliente: ${nomeCliente.toUpperCase()} - Data: ${dataAtual}`, 10, 10);
 
     const tabelaRascunho = produtos.map(p => [
         p.item,
@@ -256,7 +256,7 @@ function agruparProdutos() {
 
     // ===== PDF 2: Resumo agrupado com desconto aplicado =====
     const docResumo = new jsPDF();
-    docResumo.text(`Cliente: ${nomeCliente} - Data: ${dataAtual}`, 10, 10);
+    docResumo.text(`Cliente: ${nomeCliente.toUpperCase()} - Data: ${dataAtual}`, 10, 10);
     //docResumo.text('Resumo Agrupado (com desconto em "lata -4%"):', 10, 20);
 
     const agrupado = {};
@@ -314,7 +314,7 @@ window.onload = function() {
     const dataAtual = new Date().toLocaleDateString('pt-BR');
 
     document.getElementById("headerInfo").textContent =
-        `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
+        `${nomeCliente.toUpperCase()}`;
 atualizarStatus("salvo");
     renderizarTabela();
     registrarPesagem();
@@ -463,7 +463,7 @@ function imprimirCupom() {
             
 
             <div style="text-align: left;">
-                <div><strong>Cliente:</strong> ${nomeCliente}</div>
+                <div><strong>Cliente:</strong> ${nomeCliente.toUpperCase()}</div>
                 <div><strong>Data:</strong> ${dataAtual}</div>
             </div>
 

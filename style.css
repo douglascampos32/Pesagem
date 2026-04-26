@@ -148,3 +148,6 @@ input, select {
         display: block;
     }
 }
+.cliente {
+    text-transform: uppercase;
+}
