@@ -52,6 +52,7 @@ document.addEventListener("keydown", function(e) {
     const select = document.getElementById("item");
     select.focus();
     select.click(); // 🔥 abre lista automaticamente
+    select.size = 10; // mostra mais opções tipo lista aberta
 }, 100);
     }
 
@@ -100,23 +101,20 @@ function adicionarProduto() {
     const item = document.getElementById("item").value;
     const pesoBruto = parseFloat(document.getElementById("pesoBruto").value);
     const tara = parseFloat(document.getElementById("tara").value);
-    
-    const pesoLiquido = pesoBruto - tara; // Sem desconto aqui
-
-    produtos.push({ item, pesoBruto, tara, pesoLiquido });
 
     if (isNaN(pesoBruto) || isNaN(tara)) {
-    alert("Preencha os campos corretamente!");
-    return;
-}
+        alert("Preencha os campos corretamente!");
+        return;
+    }
+
+    const pesoLiquido = pesoBruto - tara;
+
+    produtos.push({ item, pesoBruto, tara, pesoLiquido });
 
     renderizarTabela();
     limparCampos();
     salvarLocalStorage();
-    modal.style.display = "none";
-    
-}
-
+    modal.style.display = "none";}
 
 function renderizarTabela() {
     const tbody = document.getElementById("tbody");
@@ -170,10 +168,11 @@ function registrarPesagem() {
 
     if (!existe) {
         lista.push({
-            id: pesagemId,
-            cliente: nomeCliente,
-            data: new Date().toLocaleString('pt-BR')
-        });
+    id: pesagemId,
+    cliente: nomeCliente,
+    data: new Date().toLocaleString('pt-BR'),
+    status: "pendente" // 🔥 novo campo
+});
 
         localStorage.setItem("listaPesagens", JSON.stringify(lista));
     }
@@ -185,10 +184,22 @@ function resetTabela() {
         produtos = [];
         renderizarTabela();
 
+        // 🔥 Remove dados da pesagem
         localStorage.removeItem(pesagemId);
         localStorage.removeItem(pesagemId + "_cliente");
 
-        location.reload(); // 🔥 reinicia limpo
+        // 🔥 REMOVE também do painel
+        let lista = JSON.parse(localStorage.getItem("listaPesagens")) || [];
+
+        lista = lista.filter(p => p.id !== pesagemId);
+
+        localStorage.setItem("listaPesagens", JSON.stringify(lista));
+
+        // 🔥 Limpa ID atual
+        sessionStorage.removeItem("pesagemId");
+
+        // 🔥 Recarrega página limpa
+        location.reload();
     }
 }
 function salvarLocalStorage() {
@@ -213,9 +224,11 @@ function agruparProdutos() {
     const dataAtual = new Date().toLocaleDateString('pt-BR');
     const dataFormatada = dataAtual.replace(/\//g, "-");
     const clienteNome = nomeCliente.replace(/ /g, "_");
+    
 
     // ===== PDF 1: Rascunho completo =====
-    const docRascunho = new jsPDF();
+    
+    const docRascunho = new jsPDF();docRascunho.setFontSize(15); // 👈 aumenta aqui
     docRascunho.text(`Cliente: ${nomeCliente} - Data: ${dataAtual}`, 10, 10);
 
     const tabelaRascunho = produtos.map(p => [
@@ -228,7 +241,14 @@ function agruparProdutos() {
     docRascunho.autoTable({
         head: [['Item', 'Peso Bruto', 'Tara', 'Peso Líquido']],
         body: tabelaRascunho,
-        startY: 20
+        startY: 20,
+          styles: {
+        fontSize: 12 // 👈 aumenta aqui (padrão é ~8 ou 9)
+    },
+    headStyles: {
+        fontSize: 13 // 👈 cabeçalho maior
+    }
+        
     });
 
     const nomeRascunho = `${clienteNome}_rascunho_${dataFormatada}.pdf`;
@@ -261,7 +281,17 @@ function agruparProdutos() {
     docResumo.autoTable({
         head: [['Item', 'Peso Líquido']],
         body: tabelaResumo,
-        startY: 30
+        startY: 30,
+        
+
+    styles: {
+        fontSize: 12,
+        cellPadding: 3
+    },
+    headStyles: {
+        fontSize: 13
+    }
+    
     });
 
     const nomeResumo = `${clienteNome}_${dataFormatada}.pdf`;
@@ -278,11 +308,14 @@ window.onload = function() {
         localStorage.setItem(pesagemId + "_cliente", nomeCliente);
     }
 
+    // 🔥 AQUI MUDA O NOME DA ABA
+    document.title = nomeCliente;
+
     const dataAtual = new Date().toLocaleDateString('pt-BR');
 
     document.getElementById("headerInfo").textContent =
         `GTA SUCATAS - Cliente: ${nomeCliente} - Data: ${dataAtual}`;
-
+atualizarStatus("salvo");
     renderizarTabela();
     registrarPesagem();
 };
@@ -325,7 +358,7 @@ function imprimirCupom() {
     const dataAtual = new Date().toLocaleString('pt-BR');
 
     // Nome do arquivo (para impressão/PDF)
-    const nomeArquivo = nomeCliente.replace(/[^a-zA-Z0-9]/g, "_");
+    const nomeArquivo = nomeCliente.trim().replace(/[^a-zA-Z0-9]/g, "_");
 
     let total = 0;
 
@@ -456,7 +489,7 @@ function imprimirCupom() {
                <img src="${qrCodeURL}" style="margin: 10px 0;">
             <div class="zap">Fale conosco no WhatsApp</div>
 
-
+<br><br><br>
             <script>
                 window.onload = function() {
                     window.print();
@@ -465,6 +498,21 @@ function imprimirCupom() {
         </body>
         </html>
     `);
-
+atualizarStatus("impresso");
     win.document.close();
+}
+function atualizarStatus(novoStatus) {
+    let lista = JSON.parse(localStorage.getItem("listaPesagens")) || [];
+
+    lista = lista.map(p => {
+        if (p.id === pesagemId) {
+            return {
+                ...p,
+                status: novoStatus
+            };
+        }
+        return p;
+    });
+
+    localStorage.setItem("listaPesagens", JSON.stringify(lista));
 }
