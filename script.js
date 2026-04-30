@@ -365,13 +365,21 @@ function imprimirCupom() {
     // 🔥 AGRUPAR PRODUTOS
     const agrupado = {};
 
-    produtos.forEach(p => {
-        if (!agrupado[p.item]) {
-            agrupado[p.item] = 0;
-        }
-        agrupado[p.item] += p.pesoLiquido;
-        total += p.pesoLiquido;
-    });
+ produtos.forEach(p => {
+    let pesoFinal = p.pesoLiquido;
+
+    // 🔥 aplica desconto só se for o item "lata -4%"
+    if (p.item.trim().toLowerCase() === "lata -4%") {
+        pesoFinal = p.pesoLiquido * 0.96;
+    }
+
+    if (!agrupado[p.item]) {
+        agrupado[p.item] = 0;
+    }
+
+    agrupado[p.item] += pesoFinal;
+    total += pesoFinal;
+});
 
     // 🔥 MONTAR ITENS
     let itens = "";
