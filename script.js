@@ -273,7 +273,9 @@ function agruparProdutos() {
         agrupado[item] += liquido;
     });
 
-    const tabelaResumo = Object.entries(agrupado).map(([item, peso]) => [
+   const tabelaResumo = Object.entries(agrupado)
+    .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR', { sensitivity: 'base' }))
+    .map(([item, peso]) => [
         item,
         peso.toFixed(2)
     ]);
